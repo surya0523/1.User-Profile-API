@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>User Profile API</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+  <h2>Create User</h2>
+  <input id="createName" placeholder="Name">
+  <input id="createEmail" placeholder="Email">
+  <button onclick="createUser()">Add User</button>
+
+  <h2>Get All Users</h2>
+  <button onclick="getUsers()">Show Users</button>
+  <ul id="userList"></ul>
+
+  <h2>Get User by ID (GET /users/&lt;id&gt;)</h2>
+  <input id="getId" placeholder="User ID">
+  <button onclick="getUserById()">Get User</button>
+  <div id="singleUser"></div>
+
+  <h2>Update User</h2>
+  <input id="updateId" placeholder="User ID">
+  <input id="updateName" placeholder="New Name">
+  <input id="updateEmail" placeholder="New Email">
+  <button onclick="updateUser()">Update</button>
+
+  <h2>Delete User</h2>
+  <input id="deleteId" placeholder="User ID">
+  <button onclick="deleteUser()">Delete</button>
+
+  <script>
+    function createUser() {
+      const name = document.getElementById('createName').value;
+      const email = document.getElementById('createEmail').value;
+      fetch('/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email })
+      })
+      .then(res => res.json())
+      .then(data => alert(data.message || "User added"));
+    }
+
+    function getUsers() {
+      fetch('/users')
+        .then(res => res.json())
+        .then(data => {
+          const ul = document.getElementById('userList');
+          ul.innerHTML = '';
+          data.forEach(user => {
+            const li = document.createElement('li');
+            li.textContent = `${user.id}: ${user.name} (${user.email})`;
+            ul.appendChild(li);
+          });
+        });
+    }
+
+    function getUserById() {
+      const id = document.getElementById('getId').value;
+      fetch(`/users/${id}`)
+        .then(res => res.json())
+        .then(data => {
+          const div = document.getElementById('singleUser');
+          if (data.message) {
+            div.textContent = data.message;
+          } else {
+            div.textContent = `ID ${data.id}: ${data.name} (${data.email})`;
+          }
+        });
+    }
+
+    function updateUser() {
+      const id = document.getElementById('updateId').value;
+      const name = document.getElementById('updateName').value;
+      const email = document.getElementById('updateEmail').value;
+      fetch(`/users/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email })
+      })
+      .then(res => res.json())
+      .then(data => alert(data.message || "User updated"));
+    }
+
+    function deleteUser() {
+      const id = document.getElementById('deleteId').value;
+      fetch(`/users/${id}`, {
+        method: 'DELETE'
+      })
+      .then(res => res.json())
+      .then(data => alert(data.message || "User deleted"));
+    }
+  </script>
+</body>
+</html>
